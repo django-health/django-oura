@@ -143,6 +143,40 @@ class TestDocuments:
         assert route.called
 
     @respx.mock
+    def test_sandbox_targets_sandbox_routes(self, connection):
+        route = respx.get(
+            f"{API_BASE_URL}/v2/sandbox/usercollection/daily_activity"
+        ).mock(
+            return_value=Response(
+                200, json={"data": [{"id": "d1"}], "next_token": None}
+            )
+        )
+        with OuraClient(connection, sandbox=True) as client:
+            documents = client.list_documents(
+                "daily_activity", start_date=date(2026, 7, 1), end_date=date(2026, 7, 7)
+            )
+        assert documents == [{"id": "d1"}]
+        assert route.called
+
+    @respx.mock
+    def test_sandbox_never_refreshes_tokens(self, connection):
+        # An expired token would normally trigger a proactive refresh; the
+        # sandbox accepts any Authorization value, so no refresh must happen
+        # (no OAUTH_TOKEN_URL route is mocked — a refresh would error).
+        connection.token_expires_at = datetime.now(timezone.utc)
+        connection.save(update_fields=["token_expires_at"])
+        respx.get(f"{API_BASE_URL}/v2/sandbox/usercollection/sleep").mock(
+            return_value=Response(200, json={"data": [], "next_token": None})
+        )
+        with OuraClient(connection, sandbox=True) as client:
+            assert (
+                client.list_documents(
+                    "sleep", start_date=date(2026, 7, 1), end_date=date(2026, 7, 7)
+                )
+                == []
+            )
+
+    @respx.mock
     def test_list_heartrate_sends_datetime_window(self, connection):
         route = respx.get(f"{COLLECTION}/heartrate").mock(
             return_value=Response(

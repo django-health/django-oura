@@ -16,6 +16,10 @@ OAUTH_REVOKE_URL = "https://api.ouraring.com/oauth/revoke"
 
 API_BASE_URL = "https://api.ouraring.com"
 USERCOLLECTION_PATH = "v2/usercollection"
+# Fake generated data, same shapes and routes, no Oura account required (any
+# non-empty Authorization header works). Useful for development smoke tests;
+# see CLAUDE.md for its known degeneracies before calibrating against it.
+SANDBOX_USERCOLLECTION_PATH = "v2/sandbox/usercollection"
 WEBHOOK_SUBSCRIPTION_PATH = "v2/webhook/subscription"
 
 # Data types, as they appear in both REST paths

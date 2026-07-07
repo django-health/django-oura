@@ -140,13 +140,37 @@ class TestMapSleep:
         # The last run's nominal end (25 min) exceeds the 22-minute session.
         assert clamped[-1].endDate == bedtime_end
 
-    def test_no_phases_falls_back_to_unspecified_session(self):
+    def test_no_phases_falls_back_to_duration_anchored_session(self):
         document = dict(SLEEP, sleep_phase_5_min=None)
         records = map_sleep(document)
         assert len(records) == 1
         assert records[0].value == SleepValue.ASLEEP_UNSPECIFIED
+        # total_sleep_duration (1200s) anchored at bedtime_end — not the whole
+        # bedtime span, which includes in-bed-awake time.
+        assert records[0].endDate == datetime(2026, 7, 5, 3, 22, tzinfo=timezone.utc)
+        assert records[0].startDate == datetime(2026, 7, 5, 3, 2, tzinfo=timezone.utc)
+
+    def test_fallback_without_duration_uses_bedtime_span(self):
+        document = dict(SLEEP, sleep_phase_5_min=None, total_sleep_duration=None)
+        records = map_sleep(document)
         assert records[0].startDate == datetime(2026, 7, 5, 3, 0, tzinfo=timezone.utc)
         assert records[0].endDate == datetime(2026, 7, 5, 3, 22, tzinfo=timezone.utc)
+
+    def test_degenerate_bedtime_span_still_yields_duration(self):
+        # Oura's sandbox (and some nap documents) report bedtime_start ==
+        # bedtime_end with a real total_sleep_duration.
+        document = {
+            "id": "sl-nap",
+            "type": "late_nap",
+            "bedtime_start": "2026-06-30T00:00:00.000+00:00",
+            "bedtime_end": "2026-06-30T00:00:00.000+00:00",
+            "sleep_phase_5_min": None,
+            "total_sleep_duration": 2370,
+        }
+        records = map_sleep(document)
+        assert len(records) == 1
+        assert records[0].endDate == datetime(2026, 6, 30, tzinfo=timezone.utc)
+        assert records[0].endDate - records[0].startDate == timedelta(seconds=2370)
 
     def test_deleted_tombstone_yields_nothing(self):
         assert map_sleep(dict(SLEEP, type="deleted")) == []

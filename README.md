@@ -114,6 +114,23 @@ Oura-specific scores (readiness, sleep score, resilience, stress) have no Health
 
 The only model defined here is `OuraConnection`: per-user OAuth tokens (Oura refresh tokens are single-use — both tokens are rewritten together on every refresh), granted scopes, connection status, and last sync timestamp.
 
+## Try it without a ring (sandbox mode)
+
+Oura serves generated fake data at `/v2/sandbox/usercollection` — same routes
+and shapes, no account or OAuth needed. The demo has first-class support:
+
+```
+uv sync
+uv run python manage.py migrate
+uv run python manage.py createsuperuser
+OURA_SANDBOX=1 uv run python manage.py runserver
+```
+
+Sign in, click **Sync sandbox data**, and browse the results in the admin. A
+placeholder `OuraConnection` is created automatically. Programmatic use:
+`OuraClient(connection, sandbox=True)`. Note the sandbox's degenerate corners
+(documented in `CLAUDE.md`) before treating it as calibration ground truth.
+
 ## Try it on your own data
 
 The repo includes a runnable demo Django project at `demo/`.

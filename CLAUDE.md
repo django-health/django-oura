@@ -25,6 +25,22 @@ data"), then pull the access token from `db.sqlite3` and hit
 `https://api.ouraring.com/v2/usercollection/...` directly with `httpx` before
 guessing at code fixes.
 
+Partial calibration was done 2026-07-07 against `/v2/sandbox/usercollection`
+(needs any non-empty Authorization header, nothing else). All five default
+data types fetched and ingested cleanly. Known sandbox degeneracies — good
+for smoke tests, do NOT calibrate timing/stage logic against them:
+
+- Sleep documents have `bedtime_start == bedtime_end` (midnight) and
+  `sleep_phase_5_min: null`; the real `total_sleep_duration` is what drove
+  the duration-anchored fallback in `map_sleep`.
+- Workouts have `start_datetime == end_datetime` (zero duration).
+- Heart-rate rows carry a `producer_timestamp` field not in spec 1.35, and
+  timestamps use a `Z` suffix while document routes use `.000+00:00` —
+  `_utc()` handles both.
+
+Still uncalibrated against real-ring data: `sleep_phase_5_min` run timing,
+the webhook HMAC signature scheme, and per-scope consent behavior.
+
 Things Oura does differently from its siblings (don't "fix" them):
 
 - Users consent PER SCOPE on the authorization page; the granted set can be

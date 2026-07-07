@@ -51,3 +51,4 @@ OURA_CLIENT_ID = "test-client-id"
 OURA_CLIENT_SECRET = "test-client-secret"  # noqa: S105
 OURA_REDIRECT_URI = "http://testserver/oura/callback/"
 OURA_WEBHOOK_VERIFICATION_TOKEN = "test-verification-token"  # noqa: S105
+OURA_SANDBOX = False

@@ -83,6 +83,10 @@ OURA_REDIRECT_URI = os.environ.get(
 )
 OURA_WEBHOOK_VERIFICATION_TOKEN = os.environ.get("OURA_WEBHOOK_VERIFICATION_TOKEN", "")
 
+# OURA_SANDBOX=1 drives sync against /v2/sandbox/usercollection (Oura's
+# generated fake data) — no ring, no Oura account, no OAuth flow needed.
+OURA_SANDBOX = os.environ.get("OURA_SANDBOX", "") not in ("", "0", "false")
+
 # Where oura.views.callback / disconnect redirect to. Library default is
 # /admin/; for the demo we want the user-facing homepage.
 OURA_CONNECT_SUCCESS_URL = "/"

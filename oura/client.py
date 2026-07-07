@@ -30,7 +30,11 @@ from typing import TYPE_CHECKING, Any, Callable, Mapping
 import httpx
 
 from . import oauth
-from .constants import API_BASE_URL, USERCOLLECTION_PATH
+from .constants import (
+    API_BASE_URL,
+    SANDBOX_USERCOLLECTION_PATH,
+    USERCOLLECTION_PATH,
+)
 
 if TYPE_CHECKING:
     from .models import OuraConnection
@@ -60,14 +64,21 @@ class OuraClient:
         self,
         connection: OuraConnection,
         *,
+        sandbox: bool = False,
         base_url: str = API_BASE_URL,
         timeout: httpx.Timeout = DEFAULT_TIMEOUT,
         max_retries: int = MAX_RETRIES,
         backoff_seconds: float = BASE_BACKOFF_SECONDS,
         sleep: Callable[[float], None] = time.sleep,
     ):
+        """``sandbox=True`` targets ``/v2/sandbox/usercollection`` — Oura's
+        generated fake data. The sandbox accepts any non-empty Authorization
+        value, so the connection's tokens are sent as-is and never refreshed.
+        """
         self.connection = connection
-        self._base = f"{base_url.rstrip('/')}/{USERCOLLECTION_PATH}"
+        self._sandbox = sandbox
+        collection = SANDBOX_USERCOLLECTION_PATH if sandbox else USERCOLLECTION_PATH
+        self._base = f"{base_url.rstrip('/')}/{collection}"
         self._max_retries = max_retries
         self._backoff = backoff_seconds
         self._sleep = sleep
@@ -87,6 +98,8 @@ class OuraClient:
     # core request loop ----------------------------------------------------
 
     def _ensure_fresh_token(self) -> None:
+        if self._sandbox:
+            return
         if self.connection.is_token_expired():
             oauth.refresh_access_token(self.connection)
 
@@ -113,7 +126,11 @@ class OuraClient:
                 headers=self._auth_headers(),
             )
 
-            if response.status_code == 401 and not retried_after_401:
+            if (
+                response.status_code == 401
+                and not retried_after_401
+                and not self._sandbox
+            ):
                 # Either clock skew or the token was invalidated externally —
                 # force a refresh and retry once.
                 oauth.refresh_access_token(self.connection)

@@ -218,11 +218,17 @@ def map_sleep(document: dict[str, Any]) -> list[RecordInput]:
         position = run_end
 
     if not records:
+        # Anchor the fallback at bedtime_end minus the reported sleep total
+        # (the legacy wellrider decomposition): spanning the whole bedtime
+        # would overstate sleep by the in-bed-awake time, and some documents
+        # (naps, sandbox data) carry a degenerate zero-length bedtime span.
+        total = document.get("total_sleep_duration")
+        fallback_start = end - timedelta(seconds=total) if total else start
         records.append(
             _record(
                 document,
                 suffix="session",
-                start=start,
+                start=fallback_start,
                 end=end,
                 type=SLEEP_TYPE,
                 value=SleepValue.ASLEEP_UNSPECIFIED,
