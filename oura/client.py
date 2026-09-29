@@ -24,8 +24,9 @@ user's local timezone — while the ``heartrate`` time series filters by
 from __future__ import annotations
 
 import time
+from collections.abc import Callable, Mapping
 from datetime import date, datetime
-from typing import TYPE_CHECKING, Any, Callable, Mapping
+from typing import TYPE_CHECKING, Any
 
 import httpx
 

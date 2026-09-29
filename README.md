@@ -31,14 +31,14 @@ The model uses `settings.AUTH_USER_MODEL` so it works with any custom user model
 ## Configuration
 
 ```python
-OURA_CLIENT_ID = "..."       # from https://cloud.ouraring.com/oauth/applications
+OURA_CLIENT_ID = "..."  # from https://cloud.ouraring.com/oauth/applications
 OURA_CLIENT_SECRET = "..."
 OURA_REDIRECT_URI = "https://your-app.example.com/oura/callback/"
 
 # Optional:
 OURA_SCOPES = ["daily", "heartrate", "workout", "spo2"]  # the default set
-OURA_CONNECT_SUCCESS_URL = "/"                            # default "/admin/"
-OURA_WEBHOOK_VERIFICATION_TOKEN = "..."                   # only for webhooks
+OURA_CONNECT_SUCCESS_URL = "/"  # default "/admin/"
+OURA_WEBHOOK_VERIFICATION_TOKEN = "..."  # only for webhooks
 ```
 
 Register the redirect URI on the Oura application — the token exchange fails on any mismatch. Users consent **per scope** on Oura's authorization page, so the granted set may be narrower than requested; whatever was actually granted is stored on `OuraConnection.scopes`.
@@ -90,6 +90,7 @@ Then connect a signal handler to drive ingest:
 from django.dispatch import receiver
 from oura.signals import notification_received
 from oura.webhooks import process_notification
+
 
 @receiver(notification_received)
 def on_notification(sender, payload, **kwargs):

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "django-oura"
-version = "0.2.0"
+version = "0.2.1"
 description = "A Django app for the Oura API v2, backed by django-healthdatamodel."
 readme = "README.md"
 authors = [
@@ -56,3 +56,8 @@ DJANGO_SETTINGS_MODULE = "tests.settings"
 markers = [
     "live: requires real Oura OAuth credentials in env (OURA_TEST_*)",
 ]
+
+[tool.ruff.lint]
+# Pin to the pre-ruff-0.16 default rule set. Ruff 0.16 expanded its defaults
+# from ~60 to ~400 rules; opting into the wider set is a separate decision.
+select = ["E4", "E7", "E9", "F"]
