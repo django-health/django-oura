@@ -1,6 +1,6 @@
 """Minimal Django settings for pytest-django."""
 
-SECRET_KEY = "test-secret-key"  # noqa: S105
+SECRET_KEY = "test-secret-key"
 DEBUG = False
 
 INSTALLED_APPS = [
@@ -48,7 +48,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 USE_TZ = True
 
 OURA_CLIENT_ID = "test-client-id"
-OURA_CLIENT_SECRET = "test-client-secret"  # noqa: S105
+OURA_CLIENT_SECRET = "test-client-secret"
 OURA_REDIRECT_URI = "http://testserver/oura/callback/"
-OURA_WEBHOOK_VERIFICATION_TOKEN = "test-verification-token"  # noqa: S105
+OURA_WEBHOOK_VERIFICATION_TOKEN = "test-verification-token"
 OURA_SANDBOX = False
